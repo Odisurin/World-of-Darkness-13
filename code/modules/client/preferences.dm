@@ -323,7 +323,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	discipline4type = null
 	enlightement = clane.enlightement
 	humanity = clane.start_humanity
-	true_experience = 10
+	true_experience = 50
 	key_bindings = deepCopyList(GLOB.hotkey_keybinding_list_by_key) // give them default keybinds and update their movement keys
 	C?.set_macros()
 //	pref_species = new /datum/species/kindred()
@@ -2013,8 +2013,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 							var/datum/discipline/D = new i
 							if(!D.clane_restricted)
 								disc4 += i
-							if(clane.name == "Old Clan Tzimisce" && D.name == "Vicissitude")
-								disc4 += i
 							qdel(D)
 					var/discipline4 = input(user, "Select fourth discipline", "Discipline Selection") as null|anything in disc4
 					if(discipline4)
@@ -2853,7 +2851,14 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					toggles ^= SOUND_ENDOFROUND
 
 				if("ghost_ears")
-					chat_toggles ^= CHAT_GHOSTEARS
+					if(istype(user.client.mob, /mob/dead/observer))
+						var/mob/dead/observer/obs = user.client.mob
+						if(obs.auspex_ghosted)
+							return
+						else
+							chat_toggles ^= CHAT_GHOSTEARS
+					else
+						chat_toggles ^= CHAT_GHOSTEARS
 
 				if("ghost_sight")
 					chat_toggles ^= CHAT_GHOSTSIGHT
@@ -2957,6 +2962,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					discipline3level = 1
 					discipline4level = 1
 					physique = 1
+					dexterity = 1
 					mentality = 1
 					social = 1
 					lockpicking = 0
@@ -2984,7 +2990,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					random_species()
 					random_character()
 					body_model = rand(1, 3)
-					true_experience = 10
+					true_experience = 50
 					real_name = random_unique_name(gender)
 					save_character()
 
@@ -3000,6 +3006,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						discipline3level = 1
 						discipline4level = 1
 						physique = 1
+						dexterity = 1
 						mentality = 1
 						social = 1
 						lockpicking = 0
@@ -3027,7 +3034,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						random_species()
 						random_character()
 						body_model = rand(1, 3)
-						true_experience = 10
+						true_experience = 50
 						real_name = random_unique_name(gender)
 						save_character()
 
