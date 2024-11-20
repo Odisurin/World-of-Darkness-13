@@ -532,11 +532,11 @@
 	folded_state = "streetphone"
 
 /obj/item/vamp/phone/clean
-	desc = "The usual phone of a cleaning company used to communicate with employees"
+	desc = "A stationary dial-up phone, on it's front are numbers in a rotated circle. A Buisness reception phone"
 	icon = 'code/modules/wod13/onfloor.dmi'
 	icon_state = "redphone"
 	anchored = TRUE
-	number = "700 4424"
+	number = "7007349"
 	can_fold = 0
 
 	open_state = "redphone"
@@ -544,6 +544,57 @@
 	folded_state = "redphone"
 
 /obj/item/vamp/phone/clean/Initialize()
+	. = ..()
+	GLOB.phone_numbers_list += number
+	GLOB.phones_list += src
+
+/obj/item/vamp/phone/clinic
+	desc = "A stationary dial-up phone, on it's front are numbers in a rotated circle. A Hospital reception phone."
+	icon = 'code/modules/wod13/onfloor.dmi'
+	icon_state = "redphone"
+	anchored = TRUE
+	number = "7008062"
+	can_fold = 0
+
+	open_state = "redphone"
+	closed_state = "redphone"
+	folded_state = "redphone"
+
+/obj/item/vamp/phone/clinic/Initialize()
+	. = ..()
+	GLOB.phone_numbers_list += number
+	GLOB.phones_list += src
+
+/obj/item/vamp/phone/pd
+	desc = "A stationary dial-up phone, on it's front are numbers in a rotated circle. A Police reception phone."
+	icon = 'code/modules/wod13/onfloor.dmi'
+	icon_state = "redphone"
+	anchored = TRUE
+	number = "7009221"
+	can_fold = 0
+
+	open_state = "redphone"
+	closed_state = "redphone"
+	folded_state = "redphone"
+
+/obj/item/vamp/phone/pd/Initialize()
+	. = ..()
+	GLOB.phone_numbers_list += number
+	GLOB.phones_list += src
+
+/obj/item/vamp/phone/millennium
+	desc = "A stationary dial-up phone, on it's front are numbers in a rotated circle. A Millennium Tower reception phone."
+	icon = 'code/modules/wod13/onfloor.dmi'
+	icon_state = "redphone"
+	anchored = TRUE
+	number = "7009121"
+	can_fold = 0
+
+	open_state = "redphone"
+	closed_state = "redphone"
+	folded_state = "redphone"
+
+/obj/item/vamp/phone/millennium/Initialize()
 	. = ..()
 	GLOB.phone_numbers_list += number
 	GLOB.phones_list += src
