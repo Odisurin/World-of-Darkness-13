@@ -464,8 +464,8 @@
 		new /datum/data/mining_equipment("LSD pill bottle",		/obj/item/storage/pill_bottle/lsd,	50),
 		new /datum/data/mining_equipment("LSD pill",		/obj/item/reagent_containers/pill/lsd,	10),
 		new /datum/data/mining_equipment("cannabis puff",		/obj/item/clothing/mask/cigarette/rollie/cannabis,	40),
-		new /datum/data/mining_equipment("cannabis package",		/obj/item/weedpack,	30),
-		new /datum/data/mining_equipment("cannabis leaf",	/obj/item/food/vampire/weed,	25),
+		new /datum/data/mining_equipment("cannabis package",		/obj/item/weedpack,	175),
+		new /datum/data/mining_equipment("cannabis leaf",	/obj/item/food/vampire/weed,	60),
 		new /datum/data/mining_equipment("cannabis seed",	/obj/item/weedseed,		10),
 		new /datum/data/mining_equipment("bong",	/obj/item/bong,		50),
 		new /datum/data/mining_equipment("snub-nose revolver",	/obj/item/gun/ballistic/vampire/revolver/snub,	100),
@@ -479,6 +479,7 @@
 		new /datum/data/mining_equipment("stake",	/obj/item/vampire_stake,	100),
 		new /datum/data/mining_equipment("lockpick",	/obj/item/vamp/keys/hack, 50),
 		new /datum/data/mining_equipment("zippo lighter",	/obj/item/lighter,	20),
+		new /datum/data/mining_equipment("Surgery dufflebag", /obj/item/storage/backpack/duffelbag/med/surgery, 100),
 		new /datum/data/mining_equipment("lighter",		/obj/item/lighter/greyscale,	10)
 		)
 
@@ -488,6 +489,23 @@
 		new /datum/data/mining_equipment("iron pill bottle", /obj/item/storage/pill_bottle/iron, 150),
 		new /datum/data/mining_equipment("potassium iodide pill bottle", /obj/item/storage/pill_bottle/potassiodide, 100),
 		new /datum/data/mining_equipment("bruise pack", /obj/item/stack/medical/bruise_pack, 100),
+		new /datum/data/mining_equipment("burn ointment", /obj/item/stack/medical/ointment, 100)
+		)
+
+/obj/machinery/mineral/equipment_vendor/fastfood/hospital // we should probably swap from a vendor system and work on a sort of gameplay loop - tzula
+	prize_list = list(
+		new /datum/data/mining_equipment("toxins first aid kit", /obj/item/storage/firstaid/toxin, 50),
+		new /datum/data/mining_equipment("burns first aid kit", /obj/item/storage/firstaid/fire, 50),
+		new /datum/data/mining_equipment("standard first aid kit", /obj/item/storage/firstaid/medical, 50),
+		new /datum/data/mining_equipment("respiratory aid kit", /obj/item/storage/firstaid/o2, 50),
+		new /datum/data/mining_equipment("potassium iodide pill bottle", /obj/item/defibrillator/compact, 100),
+		new /datum/data/mining_equipment("defib batteries", /obj/item/stock_parts/cell, 50),
+		new /datum/data/mining_equipment("surgery dufflebag", /obj/item/storage/backpack/duffelbag/med/surgery, 100),
+		new /datum/data/mining_equipment("ephedrine pill bottle", /obj/item/storage/pill_bottle/ephedrine, 200),
+		new /datum/data/mining_equipment("iron pill bottle", /obj/item/storage/pill_bottle/iron, 150),
+		new /datum/data/mining_equipment("bruise pack", /obj/item/stack/medical/bruise_pack, 100),
+		new /datum/data/mining_equipment("surgical apron", /obj/item/clothing/suit/apron/surgical, 100),
+		new /datum/data/mining_equipment("latex gloves", /obj/item/clothing/gloves/vampire/latex, 100),
 		new /datum/data/mining_equipment("burn ointment", /obj/item/stack/medical/ointment, 100)
 		)
 
