@@ -134,13 +134,35 @@
 					humanity = "I'm losing control over my beast!"
 
 		dat += "[humanity]<BR>"
-		dat += "<b>Physique</b>: [host.physique]<BR>"
-		dat += "<b>Dexterity</b>: [host.dexterity]<BR>"
-		dat += "<b>Social</b>: [host.social]<BR>"
-		dat += "<b>Mentality</b>: [host.mentality]<BR>"
-		dat += "<b>Lockpicking</b>: [host.lockpicking]<BR>"
-		dat += "<b>Athletics</b>: [host.athletics]<BR>"
-		dat += "<b>Cruelty</b>: [host.blood]<BR>"
+
+		if(host.clane.name == "Brujah")
+			if(GLOB.brujahname != "")
+				if(host.real_name != GLOB.brujahname)
+					dat += " My primogen is:  [GLOB.brujahname].<BR>"
+		if(host.clane.name == "Malkavian")
+			if(GLOB.malkavianname != "")
+				if(host.real_name != GLOB.malkavianname)
+					dat += " My primogen is:  [GLOB.malkavianname].<BR>"
+		if(host.clane.name == "Nosferatu")
+			if(GLOB.nosferatuname != "")
+				if(host.real_name != GLOB.nosferatuname)
+					dat += " My primogen is:  [GLOB.nosferatuname].<BR>"
+		if(host.clane.name == "Toreador")
+			if(GLOB.toreadorname != "")
+				if(host.real_name != GLOB.toreadorname)
+					dat += " My primogen is:  [GLOB.toreadorname].<BR>"
+		if(host.clane.name == "Ventrue")
+			if(GLOB.ventruename != "")
+				if(host.real_name != GLOB.ventruename)
+					dat += " My primogen is:  [GLOB.ventruename].<BR>"
+
+		dat += "<b>Physique</b>: [host.physique] + [host.additional_physique]<BR>"
+		dat += "<b>Dexterity</b>: [host.dexterity] + [host.additional_dexterity]<BR>"
+		dat += "<b>Social</b>: [host.social] + [host.additional_social]<BR>"
+		dat += "<b>Mentality</b>: [host.mentality] + [host.additional_mentality]<BR>"
+		dat += "<b>Cruelty</b>: [host.blood] + [host.additional_blood]<BR>"
+		dat += "<b>Lockpicking</b>: [host.lockpicking] + [host.additional_lockpicking]<BR>"
+		dat += "<b>Athletics</b>: [host.athletics] + [host.additional_athletics]<BR>"
 		if(host.hud_used)
 			dat += "<b>Known disciplines:</b><BR>"
 			for(var/datum/action/discipline/D in host.actions)
@@ -538,6 +560,26 @@
 
 /datum/species/kindred/check_roundstart_eligible()
 	return TRUE
+
+/datum/species/kindred/handle_body(mob/living/carbon/human/H)
+	if (!H.clane)
+		return ..()
+
+	//deflate people if they're super rotten
+	if ((H.clane.alt_sprite == "rotten4") && (H.base_body_mod == "f"))
+		H.base_body_mod = ""
+
+	if(H.clane.alt_sprite)
+		H.dna.species.limbs_id = "[H.base_body_mod][H.clane.alt_sprite]"
+
+	if (H.clane.no_hair)
+		H.hairstyle = "Bald"
+
+	if (H.clane.no_facial)
+		H.facial_hairstyle = "Shaved"
+
+	..()
+
 
 /**
  * Signal handler for lose_organ to near-instantly kill Kindred whose hearts have been removed.
