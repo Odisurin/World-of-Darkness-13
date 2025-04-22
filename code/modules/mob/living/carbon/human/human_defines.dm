@@ -19,6 +19,11 @@
 	var/hair_color = "000"
 	var/hairstyle = "Bald"
 
+///Colour used for the hair gradient.
+	var/grad_color = "000"
+	///Style used for the hair gradient.
+	var/grad_style
+
 	//Facial hair colour and style
 	var/facial_hair_color = "000"
 	var/facial_hairstyle = "Shaved"
@@ -124,3 +129,13 @@
 	var/soul_state = SOUL_PRESENT
 
 	var/can_be_embraced = TRUE
+
+	yang_chi = 4
+	max_yang_chi = 4
+	yin_chi = 2
+	max_yin_chi = 2
+
+	var/ooc_notes
+
+	///The Examine Panel TGUI.
+	var/datum/examine_panel/tgui = new() //create the datum

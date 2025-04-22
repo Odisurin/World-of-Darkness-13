@@ -14,16 +14,6 @@
 		if(HAS_TRAIT(L, TRAIT_PROSOPAGNOSIA))
 			obscure_name = TRUE
 
-		if(HAS_TRAIT(src, TRAIT_CHARMER))
-			if(gender == L.gender)
-				if(HAS_TRAIT(L, TRAIT_HOMOSEXUAL))
-					L.face_atom(src)
-					L.emote("blush")
-			else
-				if(!HAS_TRAIT(L, TRAIT_HOMOSEXUAL))
-					L.face_atom(src)
-					L.emote("blush")
-
 	var/my_shape = "average"
 	var/my_gender = "male"
 	if(gender == MALE)
@@ -52,6 +42,17 @@
 
 	var/obscured = check_obscured_slots()
 	var/skipface = (wear_mask && (wear_mask.flags_inv & HIDEFACE)) || (head && (head.flags_inv & HIDEFACE))
+
+	//faction, job, etc
+	if(iskindred(user) && iskindred(src) && is_face_visible())
+		var/mob/living/carbon/human/vampire = user
+		var/same_clan = vampire.clane == clane
+		switch(info_known)
+			if(INFO_KNOWN_PUBLIC)
+				. += "<b>You know [p_them()] as a [job] of the [clane] bloodline.</b>"
+			if(INFO_KNOWN_CLAN_ONLY)
+				if(same_clan)
+					. += "<b>You know [p_them()] as a [job]. You are of the same bloodline.</b>"
 
 	//uniform
 	if(w_uniform && !(obscured & ITEM_SLOT_ICLOTHING) && !(w_uniform.item_flags & EXAMINE_SKIP))
@@ -424,7 +425,11 @@
 			var/weaver_taint = NONE
 			var/wyld_taint = NONE
 
-			if (iskindred(src)) //vampires are static, and may be Wyrm-tainted depending on behaviour
+			if(iscathayan(src))
+				if(!check_kuei_jin_alive())
+					wyrm_taint++
+
+			if (iskindred(src))
 				var/mob/living/carbon/human/vampire = src
 				weaver_taint++
 
@@ -481,7 +486,6 @@
 		if(12 to INFINITY)
 			msg += "<span class='notice'><b><i>[t_He] [t_is] just absolutely fucked up, you can look again to take a closer look...</i></b></span>\n"
 
-
 	if (length(msg))
 		. += "<span class='warning'>[msg.Join("")]</span>"
 
@@ -490,16 +494,25 @@
 		. += trait_exam
 
 	if(ishuman(user))
-		. += "<a href='?src=[REF(src)];masquerade=1'>Spot a Masquerade violation</a>"
+		. += "<a href='byond://?src=[REF(src)];masquerade=1'>Spot a Masquerade violation</a>"
 
-	if(flavor_text)
-		. += "[sanitize_text(flavor_text)]\n"
+	var/flavor_text_link
+	var/preview_text = copytext_char(flavor_text, 1, 110)
+	// What examine_tgui.dm uses to determine if flavor text appears as "Obscured".
+	var/face_obscured = (wear_mask && (wear_mask.flags_inv & HIDEFACE)) || (head && (head.flags_inv & HIDEFACE))
+
+	if (!(face_obscured))
+		flavor_text_link = span_notice("[preview_text]... <a href='byond://?src=[REF(src)];view_flavortext=1'>\[Look closer?\]</a>")
+	else
+		flavor_text_link = span_notice("<a href='byond://?src=[REF(src)];view_flavortext=1'>\[Examine closely...\]</a>")
+	if (flavor_text_link)
+		. += flavor_text_link
 
 	var/perpname = get_face_name(get_id_name(""))
 	if(perpname && (HAS_TRAIT(user, TRAIT_SECURITY_HUD) || HAS_TRAIT(user, TRAIT_MEDICAL_HUD)))
 		var/datum/data/record/R = find_record("name", perpname, GLOB.data_core.general)
 		if(R)
-			. += "<span class='deptradio'>Rank:</span> [R.fields["rank"]]\n<a href='?src=[REF(src)];hud=1;photo_front=1'>\[Front photo\]</a><a href='?src=[REF(src)];hud=1;photo_side=1'>\[Side photo\]</a>"
+			. += "<span class='deptradio'>Rank:</span> [R.fields["rank"]]\n<a href='byond://?src=[REF(src)];hud=1;photo_front=1'>\[Front photo\]</a><a href='byond://?src=[REF(src)];hud=1;photo_side=1'>\[Side photo\]</a>"
 		if(HAS_TRAIT(user, TRAIT_MEDICAL_HUD))
 			var/cyberimp_detect
 			for(var/obj/item/organ/cyberimp/CI in internal_organs)
@@ -510,13 +523,13 @@
 				. += "<span class='notice ml-2'>[cyberimp_detect]</span>"
 			if(R)
 				var/health_r = R.fields["p_stat"]
-				. += "<a href='?src=[REF(src)];hud=m;p_stat=1'>\[[health_r]\]</a>"
+				. += "<a href='byond://?src=[REF(src)];hud=m;p_stat=1'>\[[health_r]\]</a>"
 				health_r = R.fields["m_stat"]
-				. += "<a href='?src=[REF(src)];hud=m;m_stat=1'>\[[health_r]\]</a>"
+				. += "<a href='byond://?src=[REF(src)];hud=m;m_stat=1'>\[[health_r]\]</a>"
 			R = find_record("name", perpname, GLOB.data_core.medical)
 			if(R)
-				. += "<a href='?src=[REF(src)];hud=m;evaluation=1'>\[Medical evaluation\]</a><br>"
-			. += "<a href='?src=[REF(src)];hud=m;quirk=1'>\[See quirks\]</a>"
+				. += "<a href='byond://?src=[REF(src)];hud=m;evaluation=1'>\[Medical evaluation\]</a><br>"
+			. += "<a href='byond://?src=[REF(src)];hud=m;quirk=1'>\[See quirks\]</a>"
 
 		if(HAS_TRAIT(user, TRAIT_SECURITY_HUD))
 			if(!user.stat && user != src)
@@ -527,12 +540,12 @@
 				if(R)
 					criminal = R.fields["criminal"]
 
-				. += "<span class='deptradio'>Criminal status:</span> <a href='?src=[REF(src)];hud=s;status=1'>\[[criminal]\]</a>"
-				. += jointext(list("<span class='deptradio'>Security record:</span> <a href='?src=[REF(src)];hud=s;view=1'>\[View\]</a>",
-					"<a href='?src=[REF(src)];hud=s;add_citation=1'>\[Add citation\]</a>",
-					"<a href='?src=[REF(src)];hud=s;add_crime=1'>\[Add crime\]</a>",
-					"<a href='?src=[REF(src)];hud=s;view_comment=1'>\[View comment log\]</a>",
-					"<a href='?src=[REF(src)];hud=s;add_comment=1'>\[Add comment\]</a>"), "")
+				. += "<span class='deptradio'>Criminal status:</span> <a href='byond://?src=[REF(src)];hud=s;status=1'>\[[criminal]\]</a>"
+				. += jointext(list("<span class='deptradio'>Security record:</span> <a href='byond://?src=[REF(src)];hud=s;view=1'>\[View\]</a>",
+					"<a href='byond://?src=[REF(src)];hud=s;add_citation=1'>\[Add citation\]</a>",
+					"<a href='byond://?src=[REF(src)];hud=s;add_crime=1'>\[Add crime\]</a>",
+					"<a href='byond://?src=[REF(src)];hud=s;view_comment=1'>\[View comment log\]</a>",
+					"<a href='byond://?src=[REF(src)];hud=s;add_comment=1'>\[Add comment\]</a>"), "")
 	else if(isobserver(user))
 		. += "<span class='info'><b>Traits:</b> [get_quirk_string(FALSE, CAT_QUIRK_ALL)]</span>"
 	. += "*---------*</span>"

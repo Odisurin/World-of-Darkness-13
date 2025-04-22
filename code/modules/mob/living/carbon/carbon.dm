@@ -228,6 +228,10 @@
 	if(adjusted_jump_range <1)
 		adjusted_jump_range = 1
 
+	// very high override for powers like Jade Shintai 2
+	if(HAS_TRAIT(src, TRAIT_SUPERNATURAL_DEXTERITY))
+		adjusted_jump_range = 11
+
 	var/distance = get_dist(loc, target)
 	var/turf/adjusted_target = target
 	if(distance > adjusted_jump_range)
@@ -278,31 +282,31 @@
 	dat += "<table>"
 	for(var/i in 1 to held_items.len)
 		var/obj/item/I = get_item_for_held_index(i)
-		dat += "<tr><td><B>[get_held_index_name(i)]:</B></td><td><A href='?src=[REF(src)];item=[ITEM_SLOT_HANDS];hand_index=[i]'>[(I && !(I.item_flags & ABSTRACT)) ? I : "<font color=grey>Empty</font>"]</a></td></tr>"
+		dat += "<tr><td><B>[get_held_index_name(i)]:</B></td><td><A href='byond://?src=[REF(src)];item=[ITEM_SLOT_HANDS];hand_index=[i]'>[(I && !(I.item_flags & ABSTRACT)) ? I : "<font color=grey>Empty</font>"]</a></td></tr>"
 	dat += "<tr><td>&nbsp;</td></tr>"
 
-	dat += "<tr><td><B>Back:</B></td><td><A href='?src=[REF(src)];item=[ITEM_SLOT_BACK]'>[(back && !(back.item_flags & ABSTRACT)) ? back : "<font color=grey>Empty</font>"]</A>"
-	if(has_breathable_mask && istype(back, /obj/item/tank))
-		dat += "&nbsp;<A href='?src=[REF(src)];internal=[ITEM_SLOT_BACK]'>[internal ? "Disable Internals" : "Set Internals"]</A>"
+	dat += "<tr><td><B>Back:</B></td><td><A href='byond://?src=[REF(src)];item=[ITEM_SLOT_BACK]'>[(back && !(back.item_flags & ABSTRACT)) ? back : "<font color=grey>Empty</font>"]</A>"
+	if(has_breathable_mask && istype(back, /obj/item))
+		dat += "&nbsp;<A href='byond://?src=[REF(src)];internal=[ITEM_SLOT_BACK]'>[internal ? "Disable Internals" : "Set Internals"]</A>"
 
 	dat += "</td></tr><tr><td>&nbsp;</td></tr>"
 
-	dat += "<tr><td><B>Head:</B></td><td><A href='?src=[REF(src)];item=[ITEM_SLOT_HEAD]'>[(head && !(head.item_flags & ABSTRACT)) ? head : "<font color=grey>Empty</font>"]</A></td></tr>"
+	dat += "<tr><td><B>Head:</B></td><td><A href='byond://?src=[REF(src)];item=[ITEM_SLOT_HEAD]'>[(head && !(head.item_flags & ABSTRACT)) ? head : "<font color=grey>Empty</font>"]</A></td></tr>"
 
 	if(obscured & ITEM_SLOT_MASK)
 		dat += "<tr><td><font color=grey><B>Mask:</B></font></td><td><font color=grey>Obscured</font></td></tr>"
 	else
-		dat += "<tr><td><B>Mask:</B></td><td><A href='?src=[REF(src)];item=[ITEM_SLOT_MASK]'>[(wear_mask && !(wear_mask.item_flags & ABSTRACT)) ? wear_mask : "<font color=grey>Empty</font>"]</A></td></tr>"
+		dat += "<tr><td><B>Mask:</B></td><td><A href='byond://?src=[REF(src)];item=[ITEM_SLOT_MASK]'>[(wear_mask && !(wear_mask.item_flags & ABSTRACT)) ? wear_mask : "<font color=grey>Empty</font>"]</A></td></tr>"
 
-	dat += "<tr><td><B>Neck:</B></td><td><A href='?src=[REF(src)];item=[ITEM_SLOT_NECK]'>[(wear_neck && !(wear_neck.item_flags & ABSTRACT)) ? wear_neck : "<font color=grey>Empty</font>"]</A></td></tr>"
+	dat += "<tr><td><B>Neck:</B></td><td><A href='byond://?src=[REF(src)];item=[ITEM_SLOT_NECK]'>[(wear_neck && !(wear_neck.item_flags & ABSTRACT)) ? wear_neck : "<font color=grey>Empty</font>"]</A></td></tr>"
 
 	if(handcuffed)
-		dat += "<tr><td><B>Handcuffed:</B> <A href='?src=[REF(src)];item=[ITEM_SLOT_HANDCUFFED]'>Remove</A></td></tr>"
+		dat += "<tr><td><B>Handcuffed:</B> <A href='byond://?src=[REF(src)];item=[ITEM_SLOT_HANDCUFFED]'>Remove</A></td></tr>"
 	if(legcuffed)
-		dat += "<tr><td><B>Legcuffed:</B> <A href='?src=[REF(src)];item=[ITEM_SLOT_LEGCUFFED]'>Remove</A></td></tr>"
+		dat += "<tr><td><B>Legcuffed:</B> <A href='byond://?src=[REF(src)];item=[ITEM_SLOT_LEGCUFFED]'>Remove</A></td></tr>"
 
 	dat += {"</table>
-	<A href='?src=[REF(user)];mach_close=mob[REF(src)]'>Close</A>
+	<A href='byond://?src=[REF(user)];mach_close=mob[REF(src)]'>Close</A>
 	"}
 
 	var/datum/browser/popup = new(user, "mob[REF(src)]", "[src]", 440, 510)
@@ -315,7 +319,7 @@
 	if(href_list["internal"] && usr.canUseTopic(src, BE_CLOSE, NO_DEXTERITY))
 		var/slot = text2num(href_list["internal"])
 		var/obj/item/ITEM = get_item_by_slot(slot)
-		if(ITEM && istype(ITEM, /obj/item/tank) && wear_mask && (wear_mask.clothing_flags & MASKINTERNALS))
+		if(ITEM && istype(ITEM, /obj/item) && wear_mask && (wear_mask.clothing_flags & MASKINTERNALS))
 			visible_message("<span class='danger'>[usr] tries to [internal ? "close" : "open"] the valve on [src]'s [ITEM.name].</span>", \
 							"<span class='userdanger'>[usr] tries to [internal ? "close" : "open"] the valve on your [ITEM.name].</span>", null, null, usr)
 			to_chat(usr, "<span class='notice'>You try to [internal ? "close" : "open"] the valve on [src]'s [ITEM.name]...</span>")
@@ -323,7 +327,7 @@
 				if(internal)
 					internal = null
 					update_internals_hud_icon(0)
-				else if(ITEM && istype(ITEM, /obj/item/tank))
+				else if(ITEM && istype(ITEM, /obj/item))
 					if((wear_mask && (wear_mask.clothing_flags & MASKINTERNALS)) || getorganslot(ORGAN_SLOT_BREATHING_TUBE))
 						internal = ITEM
 						update_internals_hud_icon(1)
@@ -714,6 +718,10 @@
 		sight |= (SEE_TURFS|SEE_MOBS|SEE_OBJS)
 		see_in_dark = max(see_in_dark, 8)
 
+	if(HAS_TRAIT(src, TRAIT_NIGHT_VISION))
+		lighting_alpha = min(lighting_alpha, LIGHTING_PLANE_ALPHA_NV_TRAIT)
+		see_in_dark = max(see_in_dark, 8)
+
 	if(see_override)
 		see_invisible = see_override
 	. = ..()
@@ -835,6 +843,8 @@
 
 	//Fire and Brute damage overlay (BSSR)
 	var/hurtdamage = getBruteLoss() + getFireLoss() + damageoverlaytemp
+	//Now adjust the damage in proportion to actual maxHealth, 20 damage is considered 10 damage on a mob with a maxHealth of 200
+	hurtdamage = hurtdamage * 100/(max(maxHealth, 1)) //No dividing with 0 in case maxHealth somehow becomes 0.
 	if(hurtdamage)
 		var/severity = 0
 		switch(hurtdamage)
@@ -906,7 +916,7 @@
 		return
 	if(stat != DEAD)
 		//special death handling for vampires, who don't die until -200 health
-		if (iskindred(src))
+		if (iskindred(src) || iscathayan(src))
 			if(health <= HEALTH_THRESHOLD_VAMPIRE_DEAD && !HAS_TRAIT(src, TRAIT_NODEATH))
 				death()
 				return

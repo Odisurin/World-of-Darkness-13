@@ -99,6 +99,7 @@
 	var/turf/T = get_step(src, dir)
 	var/turf/T1 = get_step(T, turn(dir, -90))
 	var/turf/T2 = get_step(T, turn(dir, 90))
+	SEND_SIGNAL(src, COMSIG_MOB_MELEE_SWING, M, T, T1, T2)
 	for(var/mob/living/MB in T)
 		if(MB)
 			M = MB
@@ -504,7 +505,7 @@
 	if(istype(ML))
 		ML.pulled(src)
 
-/mob/living/carbon/human/CtrlClick(mob/user)
+/mob/living/CtrlClick(mob/user)
 	if(ishuman(user) && Adjacent(user) && !user.incapacitated())
 		if(world.time < user.next_move)
 			return FALSE
@@ -528,14 +529,14 @@
 	var/turf/T = get_turf(src)
 	if(T && (isturf(loc) || isturf(src)) && user.TurfAdjacent(T))
 		user.listed_turf = T
-		user.client << output("[url_encode(json_encode(T.name))];", "statbrowser:create_listedturf")
+		user.client.stat_panel.send_message("create_listedturf", T.name)
 
 /// Use this instead of [/mob/proc/AltClickOn] where you only want turf content listing without additional atom alt-click interaction
 /atom/proc/AltClickNoInteract(mob/user, atom/A)
 	var/turf/T = get_turf(A)
 	if(T && user.TurfAdjacent(T))
 		user.listed_turf = T
-		user.client << output("[url_encode(json_encode(T.name))];", "statbrowser:create_listedturf")
+		user.client.stat_panel.send_message("create_listedturf", T.name)
 
 /mob/proc/TurfAdjacent(turf/T)
 	return T.Adjacent(src)

@@ -270,6 +270,17 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_CHARMER			"charmer"
 #define TRAIT_UNMASQUERADE		"unmasquerade"	//For tzi clothing
 #define TRAIT_NONMASQUERADE		"nonmasquerade"	//For tzi mods
+#define TRAIT_GUNFIGHTER        "gunfighter"    //Halves firing delay and cooldown between burst fire shots
+/// Makes gambling incredibly effective, and causes random beneficial events to happen for the mob.
+#define TRAIT_SUPERNATURAL_LUCK	"supernatural_luck"
+/// Lets the mob block projectiles like bullets using only their hands.
+#define TRAIT_HANDS_BLOCK_PROJECTILES "hands_block_projectiles"
+/// The mob always dodges melee attacks
+#define TRAIT_ENHANCED_MELEE_DODGE "enhanced_melee_dodge"
+/// The mob can easily swim and jump very far.
+#define TRAIT_SUPERNATURAL_DEXTERITY "supernatural_dexterity"
+/// Can pass through walls so long as it doesn't move the mob into a new area
+#define TRAIT_PASS_THROUGH_WALLS "pass_through_walls"
 
 // You can stare into the abyss, but it does not stare back.
 // You're immune to the hallucination effect of the supermatter, either
@@ -520,3 +531,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 
 /// Trait from [/datum/antagonist/nukeop/clownop]
 #define CLOWNOP_TRAIT "clownop"
+
+/// Apply this to make a mob not dense, and remove it when you want it to no longer make them undense, other sorces of undesity will still apply. Always define a unique source when adding a new instance of this!
+#define TRAIT_UNDENSE "undense"
+/// A trait gained by leaning against a wall
+#define TRAIT_LEANING "leaning"

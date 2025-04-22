@@ -75,6 +75,8 @@
 					return
 				if(user.grab_state >= GRAB_NECK)
 					tablelimbsmash(user, pushed_mob)
+					if(ishuman(pushed_mob) && pushed_mob.stat != DEAD)
+						call_dharma("torture", user)
 				else
 					tablepush(user, pushed_mob)
 			if(user.a_intent == INTENT_HELP)
@@ -112,10 +114,10 @@
 		if(vw.low)
 			return TRUE
 
-/obj/structure/table/CanAStarPass(ID, dir, caller)
+/obj/structure/table/CanAStarPass(ID, dir, pathfinding_atom)
 	. = !density
-	if(ismovable(caller))
-		var/atom/movable/mover = caller
+	if(ismovable(pathfinding_atom))
+		var/atom/movable/mover = pathfinding_atom
 		. = . || (mover.pass_flags & PASSTABLE)
 
 /obj/structure/table/proc/tableplace(mob/living/user, mob/living/pushed_mob)

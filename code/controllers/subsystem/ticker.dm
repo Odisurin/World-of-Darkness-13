@@ -155,7 +155,7 @@ SUBSYSTEM_DEF(ticker)
 				start_at = world.time + (CONFIG_GET(number/lobby_countdown) * 10)
 			for(var/client/C in GLOB.clients)
 				window_flash(C, ignorepref = TRUE) //let them know lobby has opened up.
-			to_chat(world, "<span class='boldnotice'>Welcome to [station_name()]!</span>")
+			to_chat(world, "<span class='boldnotice'>Welcome to [SSmapping.config.map_name]!</span>")
 			send2chat("New round starting on [SSmapping.config.map_name]!", CONFIG_GET(string/chat_announce_new_game))
 			current_state = GAME_STATE_PREGAME
 			//Everyone who wants to be an observer is now spawned
@@ -291,6 +291,8 @@ SUBSYSTEM_DEF(ticker)
 		var/datum/callback/cb = I
 		cb.InvokeAsync()
 	LAZYCLEARLIST(round_start_events)
+
+	distribute_dwelling_loot() //Sets up loot tables and difficulties for dwellings
 
 	log_world("Game start took [(world.timeofday - init_start)/10]s")
 	round_start_time = world.time
@@ -444,7 +446,7 @@ SUBSYSTEM_DEF(ticker)
 	if(!hpc)
 		listclearnulls(queued_players)
 		for (var/mob/dead/new_player/NP in queued_players)
-			to_chat(NP, "<span class='userdanger'>The alive players limit has been released!<br><a href='?src=[REF(NP)];late_join=override'>[html_encode(">>Join Game<<")]</a></span>")
+			to_chat(NP, "<span class='userdanger'>The alive players limit has been released!<br><a href='byond://?src=[REF(NP)];late_join=override'>[html_encode(">>Join Game<<")]</a></span>")
 			SEND_SOUND(NP, sound('sound/misc/notice1.ogg'))
 			NP.LateChoices()
 		queued_players.len = 0
@@ -459,7 +461,7 @@ SUBSYSTEM_DEF(ticker)
 			listclearnulls(queued_players)
 			if(living_player_count() < hpc)
 				if(next_in_line?.client)
-					to_chat(next_in_line, "<span class='userdanger'>A slot has opened! You have approximately 20 seconds to join. <a href='?src=[REF(next_in_line)];late_join=override'>\>\>Join Game\<\<</a></span>")
+					to_chat(next_in_line, "<span class='userdanger'>A slot has opened! You have approximately 20 seconds to join. <a href='byond://?src=[REF(next_in_line)];late_join=override'>\>\>Join Game\<\<</a></span>")
 					SEND_SOUND(next_in_line, sound('sound/misc/notice1.ogg'))
 					next_in_line.LateChoices()
 					return
@@ -627,6 +629,10 @@ SUBSYSTEM_DEF(ticker)
 	set waitfor = FALSE
 	if(usr && !check_rights(R_SERVER, TRUE))
 		return
+	// Make sure to set json_conversion_path in config/config.txt! You can't set this in-game!
+	if(CONFIG_GET(string/json_conversion_path))
+		// Buckle up, we're gonna json it...
+		world.convert_saves_to_json(CONFIG_GET(string/json_conversion_path))
 
 	if(!delay)
 		delay = CONFIG_GET(number/round_end_countdown) * 10

@@ -584,6 +584,11 @@
 
 	point_at(A)
 
+	if(iscathayan(A))
+		var/mob/living/carbon/human/hum = A
+		if(hum.mind?.dharma?.Po == "Legalist")
+			hum.mind.dharma.roll_po(src, hum)
+
 	return TRUE
 
 /**
@@ -1006,7 +1011,7 @@
 			LAZYREMOVE(mob_spell_list, S)
 			qdel(S)
 	if(client)
-		client << output(null, "statbrowser:check_spells")
+		client.stat_panel.send_message("check_spells")
 
 ///Return any anti magic atom on this mob that matches the magic type
 /mob/proc/anti_magic_check(magic = TRUE, holy = FALSE, tinfoil = FALSE, chargecost = 1, self = FALSE)
@@ -1198,18 +1203,13 @@
 		return
 	client.mouse_pointer_icon = initial(client.mouse_pointer_icon)
 	var/shootahell = FALSE
-	var/discipliner = FALSE
 	if(ishuman(src))
 		var/mob/living/carbon/human/H = src
 		if(istype(H.get_active_held_item(), /obj/item/gun))
 			shootahell = TRUE
-//		for(var/atom/movable/screen/disciplines/DISCP in H.hud_used.static_inventory)
-//			if(DISCP)
-//				if(DISCP.active)
-//					discipliner = TRUE
 	if(examine_cursor_icon && client.keys_held["Shift"]) //mouse shit is hardcoded, make this non hard-coded once we make mouse modifiers bindable
 		client.mouse_pointer_icon = examine_cursor_icon
-	else if(discipliner)
+	else if(discipline_targeting)
 		client.mouse_pointer_icon = discipline_cursor_icon
 	else if(shootahell)
 		client.mouse_pointer_icon = pvp_cursor_icon

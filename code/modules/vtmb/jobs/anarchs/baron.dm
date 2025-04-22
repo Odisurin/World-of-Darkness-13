@@ -22,20 +22,24 @@
 	my_contact_is_important = TRUE
 	known_contacts = list(
 		"Prince",
-		"Dealer"
+		"Sheriff",
+		"Dealer",
+		"Bouncer",
+		"Emissary",
+		"Sweeper"
 	)
 
 	v_duty = "You lead the Anarchs in the City. A Camarilla faction that values freedom and individuality. While not a fan of the traditions, you still respect the Masquerade."
 	minimal_masquerade = 3
 	allowed_species = list("Vampire")
-	allowed_bloodlines = list("Daughters of Cacophony", "True Brujah", "Brujah", "Nosferatu", "Gangrel", "Toreador", "Malkavian", "Ventrue", "Lasombra", "Gargoyle")
+	allowed_bloodlines = list("Daughters of Cacophony", "Baali", "Banu Haqim", "Caitiff", "True Brujah", "Brujah", "Nosferatu", "Gangrel", "Toreador", "Malkavian", "Ventrue", "Lasombra", "Gargoyle", "Ministry")
 	experience_addition = 20
 
 /datum/outfit/job/barkeeper
 	name = "Baron"
 	jobtype = /datum/job/vamp/barkeeper
 
-	id = /obj/item/card/id/anarch
+	id = /obj/item/card/id/baron
 	glasses = /obj/item/clothing/glasses/vampire/sun
 	uniform = /obj/item/clothing/under/vampire/bar
 	suit = /obj/item/clothing/suit/vampire/jacket/better
@@ -47,7 +51,6 @@
 
 /datum/outfit/job/barkeeper/pre_equip(mob/living/carbon/human/H)
 	..()
-	H.vampire_faction = "Anarch"
 	if(H.gender == FEMALE)
 		uniform = /obj/item/clothing/under/vampire/bar/female
 		shoes = /obj/item/clothing/shoes/vampire/heels

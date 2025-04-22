@@ -405,7 +405,7 @@ GLOBAL_LIST_INIT(malf_modules, subtypesof(/datum/ai_module))
 	enable_text = "<span class='notice'>You tap into the station's powernet. Click on a machine to animate it, or use the ability again to cancel.</span>"
 	disable_text = "<span class='notice'>You release your hold on the powernet.</span>"
 
-/obj/effect/proc_holder/ranged_ai/override_machine/InterceptClickOn(mob/living/caller, params, obj/machinery/target)
+/obj/effect/proc_holder/ranged_ai/override_machine/InterceptClickOn(mob/living/clicker, params, obj/machinery/target)
 	if(..())
 		return
 	if(ranged_ability_user.incapacitated())
@@ -488,7 +488,7 @@ GLOBAL_LIST_INIT(malf_modules, subtypesof(/datum/ai_module))
 	enable_text = "<span class='notice'>You tap into the station's powernet. Click on a machine to detonate it, or use the ability again to cancel.</span>"
 	disable_text = "<span class='notice'>You release your hold on the powernet.</span>"
 
-/obj/effect/proc_holder/ranged_ai/overload_machine/InterceptClickOn(mob/living/caller, params, obj/machinery/target)
+/obj/effect/proc_holder/ranged_ai/overload_machine/InterceptClickOn(mob/living/clicker, params, obj/machinery/target)
 	if(..())
 		return
 	if(ranged_ability_user.incapacitated())
@@ -651,7 +651,7 @@ GLOBAL_LIST_INIT(malf_modules, subtypesof(/datum/ai_module))
 	cost = 25
 	power_type = /datum/action/innate/ai/break_fire_alarms
 	unlock_text = "<span class='notice'>You replace the thermal sensing capabilities of all fire alarms with a manual override, allowing you to turn them off at will.</span>"
-	unlock_sound = 'goon/sound/machinery/firealarm.ogg'
+	unlock_sound = 'sound/effects/adminhelp.ogg'
 
 /datum/action/innate/ai/break_fire_alarms
 	name = "Override Thermal Sensors"

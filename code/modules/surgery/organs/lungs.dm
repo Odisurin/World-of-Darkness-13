@@ -3,8 +3,6 @@
 	var/operated = FALSE	//whether we can still have our damages fixed through surgery
 	name = "lungs"
 	icon_state = "lungs"
-	illegal = TRUE
-	cost = 800
 	zone = BODY_ZONE_CHEST
 	slot = ORGAN_SLOT_LUNGS
 	gender = PLURAL
@@ -77,6 +75,9 @@
 
 	var/crit_stabilizing_reagent = /datum/reagent/medicine/epinephrine
 
+/obj/item/organ/lungs/Initialize()
+	. = ..()
+	AddComponent(/datum/component/selling/organ, 450, "organ", TRUE, -1, 0)
 
 /obj/item/organ/lungs/proc/check_breath(datum/gas_mixture/breath, mob/living/carbon/human/H)
 	if(H.status_flags & GODMODE)
@@ -394,13 +395,6 @@
 	// Miasma
 		if (breath_gases[/datum/gas/miasma])
 			var/miasma_pp = breath.get_breath_partial_pressure(breath_gases[/datum/gas/miasma][MOLES])
-
-			//Miasma sickness
-			if(prob(0.5 * miasma_pp))
-				var/datum/disease/advance/miasma_disease = new /datum/disease/advance/random(min(round(max(miasma_pp/2, 1), 1), 6), min(round(max(miasma_pp, 1), 1), 8))
-				//tl;dr the first argument chooses the smaller of miasma_pp/2 or 6(typical max virus symptoms), the second chooses the smaller of miasma_pp or 8(max virus symptom level) //
-				miasma_disease.name = "Unknown"//^each argument has a minimum of 1 and rounds to the nearest value. Feel free to change the pp scaling I couldn't decide on good numbers for it.
-				miasma_disease.try_infect(owner)
 
 			// Miasma side effects
 			switch(miasma_pp)

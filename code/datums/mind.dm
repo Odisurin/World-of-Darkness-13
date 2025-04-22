@@ -83,6 +83,9 @@
 	/// A lazy list of statuses to add next to this mind in the traitor panel
 	var/list/special_statuses
 
+	//Dharma path
+	var/datum/dharma/dharma
+
 /datum/mind/New(_key)
 	key = _key
 	martial_art = default_martial_art
@@ -464,7 +467,7 @@
 				output += "</ul>"
 
 	if(window)
-		recipient << browse(output,"window=memory")
+		recipient << browse(HTML_SKELETON(output),"window=memory")
 	else if(all_objectives.len || memory)
 		to_chat(recipient, "<i>[output]</i>")
 
@@ -719,7 +722,7 @@
 		if(istype(S, spell))
 			spell_list -= S
 			qdel(S)
-	current?.client << output(null, "statbrowser:check_spells")
+	current?.client.stat_panel.send_message("check_spells")
 
 /datum/mind/proc/RemoveAllSpells()
 	for(var/obj/effect/proc_holder/S in spell_list)

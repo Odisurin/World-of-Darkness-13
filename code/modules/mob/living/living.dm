@@ -392,12 +392,12 @@
 		to_chat(src, text="You are unable to succumb to death! This life continues.", type=MESSAGE_TYPE_INFO)
 		return
 	log_message("Has [whispered ? "whispered his final words" : "succumbed to death"] with [round(health, 0.1)] points of health!", LOG_ATTACK)
-	if(iskindred(src) && !HAS_TRAIT(src, TRAIT_TORPOR))
+	if((iskindred(src) || iscathayan(src)) && !HAS_TRAIT(src, TRAIT_TORPOR))
 		adjustOxyLoss(health - HEALTH_THRESHOLD_VAMPIRE_TORPOR)
 		updatehealth()
-	if(iskindred(src) && HAS_TRAIT(src, TRAIT_TORPOR))
+	if((iskindred(src) || iscathayan(src)) && HAS_TRAIT(src, TRAIT_TORPOR))
 		adjustOxyLoss(health - HEALTH_THRESHOLD_VAMPIRE_DEAD)
-	if(!iskindred(src))
+	if(!iskindred(src) && !iscathayan(src))
 		adjustOxyLoss(health - HEALTH_THRESHOLD_DEAD)
 		updatehealth()
 	if(!whispered)
@@ -406,12 +406,24 @@
 /mob/living/verb/untorpor()
 	set hidden = TRUE
 	if(HAS_TRAIT(src, TRAIT_TORPOR))
-		if (bloodpool > 0)
-			bloodpool -= 1
-			cure_torpor()
-			to_chat(src, "<span class='notice'>You have awoken from your Torpor.</span>")
-		else
-			to_chat(src, "<span class='warning'>You have no blood to re-awaken with...</span>")
+		if(iskindred(src))
+			if (bloodpool > 0)
+				bloodpool -= 1
+				cure_torpor()
+				to_chat(src, "<span class='notice'>You have awoken from your Torpor.</span>")
+			else
+				to_chat(src, "<span class='warning'>You have no blood to re-awaken with...</span>")
+		if(iscathayan(src))
+			if (yang_chi > 0)
+				yang_chi -= 1
+				cure_torpor()
+				to_chat(src, "<span class='notice'>You have awoken from your Little Death.</span>")
+			else if (yin_chi > 0)
+				yin_chi -= 1
+				cure_torpor()
+				to_chat(src, "<span class='notice'>You have awoken from your Little Death.</span>")
+			else
+				to_chat(src, "<span class='warning'>You have no Chi to re-awaken with...</span>")
 
 /mob/living/incapacitated(ignore_restraints = FALSE, ignore_grab = FALSE, ignore_stasis = FALSE)
 	if(HAS_TRAIT(src, TRAIT_INCAPACITATED) || (!ignore_restraints && (HAS_TRAIT(src, TRAIT_RESTRAINED) || (!ignore_grab && pulledby && pulledby.grab_state >= GRAB_AGGRESSIVE))) || (!ignore_stasis && IS_IN_STASIS(src)))
@@ -524,12 +536,14 @@
 				to_chat(src, "<span class='notice'>You stand up.</span>")
 			get_up(instant)
 
+	SEND_SIGNAL(src, COMSIG_LIVING_RESTING, new_resting, silent, instant)
 	update_resting()
 
 
 /// Proc to append and redefine behavior to the change of the [/mob/living/var/resting] variable.
 /mob/living/proc/update_resting()
 	update_rest_hud_icon()
+	SEND_SIGNAL(src, COMSIG_LIVING_RESTING_UPDATED, resting)
 
 
 /mob/living/proc/get_up(instant = FALSE)
@@ -574,7 +588,11 @@
 	REMOVE_TRAIT(src, TRAIT_PULL_BLOCKED, LYING_DOWN_TRAIT)
 	body_position_pixel_y_offset = 0
 
-
+/mob/living/proc/update_density()
+	if(HAS_TRAIT(src, TRAIT_UNDENSE))
+		set_density(FALSE)
+	else
+		set_density(TRUE)
 
 //Recursive function to find everything a mob is holding. Really shitty proc tbh.
 /mob/living/get_contents()
@@ -1017,6 +1035,7 @@
 				if(NPC.stat < SOFT_CRIT)
 					if(istype(what, /obj/item/clothing) || istype(what, /obj/item/vamp/keys) || istype(what, /obj/item/stack/dollar))
 						H.AdjustHumanity(-1, 6)
+						call_dharma("steal", H)
 			if(islist(where))
 				var/list/L = where
 				if(what == who.get_item_for_held_index(L[2]))
@@ -1400,6 +1419,7 @@
 		if(M.can_be_held && U.pulling == M)
 			M.mob_try_pickup(U)//blame kevinz
 			return//dont open the mobs inventory if you are picking them up
+
 	. = ..()
 
 /mob/living/proc/mob_pickup(mob/living/L)
@@ -1513,13 +1533,13 @@
 	. += {"
 		<br><font size='1'>[VV_HREF_TARGETREF(refid, VV_HK_GIVE_DIRECT_CONTROL, "[ckey || "no ckey"]")] / [VV_HREF_TARGETREF_1V(refid, VV_HK_BASIC_EDIT, "[real_name || "no real name"]", NAMEOF(src, real_name))]</font>
 		<br><font size='1'>
-			BRUTE:<font size='1'><a href='?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=brute' id='brute'>[getBruteLoss()]</a>
-			FIRE:<font size='1'><a href='?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=fire' id='fire'>[getFireLoss()]</a>
-			TOXIN:<font size='1'><a href='?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=toxin' id='toxin'>[getToxLoss()]</a>
-			OXY:<font size='1'><a href='?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=oxygen' id='oxygen'>[getOxyLoss()]</a>
-			CLONE:<font size='1'><a href='?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=clone' id='clone'>[getCloneLoss()]</a>
-			BRAIN:<font size='1'><a href='?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=brain' id='brain'>[getOrganLoss(ORGAN_SLOT_BRAIN)]</a>
-			STAMINA:<font size='1'><a href='?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=stamina' id='stamina'>[getStaminaLoss()]</a>
+			BRUTE:<font size='1'><a href='byond://?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=brute' id='brute'>[getBruteLoss()]</a>
+			FIRE:<font size='1'><a href='byond://?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=fire' id='fire'>[getFireLoss()]</a>
+			TOXIN:<font size='1'><a href='byond://?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=toxin' id='toxin'>[getToxLoss()]</a>
+			OXY:<font size='1'><a href='byond://?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=oxygen' id='oxygen'>[getOxyLoss()]</a>
+			CLONE:<font size='1'><a href='byond://?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=clone' id='clone'>[getCloneLoss()]</a>
+			BRAIN:<font size='1'><a href='byond://?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=brain' id='brain'>[getOrganLoss(ORGAN_SLOT_BRAIN)]</a>
+			STAMINA:<font size='1'><a href='byond://?_src_=vars;[HrefToken()];mobToDamage=[refid];adjustDamage=stamina' id='stamina'>[getStaminaLoss()]</a>
 		</font>
 	"}
 
@@ -1920,13 +1940,13 @@
 		set_lying_angle(pick(90, 270))
 		set_body_position(LYING_DOWN)
 		on_fall()
-
+	SEND_SIGNAL(src, COMSIG_LIVING_RESTING_UPDATED)
 
 /// Proc to append behavior to the condition of being floored. Called when the condition ends.
 /mob/living/proc/on_floored_end()
 	if(!resting)
 		get_up()
-
+	SEND_SIGNAL(src, COMSIG_LIVING_RESTING_UPDATED)
 
 /// Proc to append behavior to the condition of being handsblocked. Called when the condition starts.
 /mob/living/proc/on_handsblocked_start()
@@ -1983,6 +2003,9 @@
 	return dexterity + additional_dexterity
 
 /mob/living/proc/get_total_social()
+	if(iscathayan(src))
+		if(mind?.dharma?.animated == "Yin")
+			return max(0, social + additional_social - 2)
 	return social + additional_social
 
 /mob/living/proc/get_total_mentality()

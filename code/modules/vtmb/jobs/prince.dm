@@ -44,12 +44,13 @@
 
 /datum/job/vamp/prince/announce(mob/living/carbon/human/H)
 	..()
-	SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, PROC_REF(minor_announce), "Prince [H.real_name] is in the city!"))
+	SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(minor_announce), "Prince [H.real_name] is in the city!"))
 
 /datum/outfit/job/prince
 	name = "Prince"
 	jobtype = /datum/job/vamp/prince
 
+	ears = /obj/item/p25radio
 	id = /obj/item/card/id/prince
 	glasses = /obj/item/clothing/glasses/vampire/sun
 	gloves = /obj/item/clothing/gloves/vampire/latex
@@ -70,7 +71,7 @@
 
 /datum/outfit/job/prince/pre_equip(mob/living/carbon/human/H)
 	..()
-	H.vampire_faction = "Camarilla"
+	H.ignores_warrant = TRUE
 	if(H.gender == FEMALE)
 		uniform = /obj/item/clothing/under/vampire/prince/female
 		shoes = /obj/item/clothing/shoes/vampire/heels

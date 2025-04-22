@@ -20,8 +20,6 @@
 #define CHAT_LAYER_MAX_Z			(CHAT_LAYER_MAX - CHAT_LAYER) / CHAT_LAYER_Z_STEP
 /// The dimensions of the chat message icons
 #define CHAT_MESSAGE_ICON_SIZE		9
-/// Macro from Lummox used to get height from a MeasureText proc
-#define WXH_TO_HEIGHT(x)			text2num(copytext(x, findtextEx(x, "x") + 1))
 
 /**
  * # Chat Message Overlay
@@ -193,6 +191,8 @@
 	message.appearance_flags = APPEARANCE_UI_IGNORE_ALPHA | KEEP_APART
 	message.alpha = 0
 	message.pixel_y = owner.bound_height * 0.95
+	animate(message, alpha = 0, pixel_y = owner.bound_height * 0.95,  time = 1)
+	sleep(1)
 	message.maptext_width = CHAT_MESSAGE_WIDTH
 	message.maptext_height = mheight
 	message.maptext_x = (CHAT_MESSAGE_WIDTH - owner.bound_width) * -0.5
@@ -200,7 +200,7 @@
 
 	// View the message
 	LAZYADDASSOC(owned_by.seen_messages, message_loc, src)
-	owned_by.images |= message
+	owned_by.images += message// Temp fix for chat flickering issue
 	animate(message, alpha = 255, time = CHAT_MESSAGE_SPAWN_TIME)
 
 	// Register with the runechat SS to handle EOL and destruction

@@ -54,6 +54,7 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/getcurrentlogs,		/*for accessing server logs for the current round*/
 	/client/proc/cmd_admin_subtle_message,	/*send a message to somebody as a 'voice in their head'*/
 	/client/proc/cmd_admin_adjust_masquerade, /*adjusts the masquerade level of a player*/
+	/client/proc/cmd_admin_global_adjust_masquerade, /*adjusts the global masquerade*/
 	/client/proc/cmd_admin_adjust_humanity, /*adjusts the humanity level of a player*/
 	/client/proc/cmd_admin_headset_message,	/*send a message to somebody through their headset as CentCom*/
 	/client/proc/cmd_admin_delete,		/*delete an instance/object/mob/etc*/
@@ -89,7 +90,8 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/resetasaycolor,
 	/client/proc/toggleadminhelpsound,
 	/client/proc/respawn_character,
-	/datum/admins/proc/open_borgopanel
+	/datum/admins/proc/open_borgopanel,
+	/client/proc/cmd_admin_set_dwelling_ratios, /*Home invastion house ratios */
 	)
 GLOBAL_LIST_INIT(admin_verbs_ban, list(/client/proc/unban_panel, /client/proc/ban_panel, /client/proc/stickybanpanel))
 GLOBAL_PROTECT(admin_verbs_ban)
@@ -177,6 +179,7 @@ GLOBAL_PROTECT(admin_verbs_debug)
 	/client/proc/map_template_upload,
 	/client/proc/jump_to_ruin,
 	/client/proc/clear_dynamic_transit,
+	/client/proc/run_empty_query,
 	/client/proc/toggle_medal_disable,
 	/client/proc/view_runtimes,
 	/client/proc/pump_random_event,
@@ -221,6 +224,7 @@ GLOBAL_LIST_INIT(admin_verbs_hideable, list(
 	/client/proc/toggle_view_range,
 	/client/proc/cmd_admin_subtle_message,
 	/client/proc/cmd_admin_adjust_masquerade,
+	/client/proc/cmd_admin_global_adjust_masquerade,
 	/client/proc/cmd_admin_adjust_humanity,
 	/client/proc/cmd_admin_headset_message,
 	/client/proc/cmd_admin_check_contents,
@@ -368,7 +372,6 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 					message_admins("[key_name_admin(usr)] re-entered corpse")
 				ghost.can_reenter_corpse = TRUE //force re-entering even when otherwise not possible
 				ghost.client.show_popup_menus = 0
-				ghost.client.color = CMNoir
 				ghost.reenter_corpse()
 
 				SSblackbox.record_feedback("tally", "admin_verb", 1, "Admin Reenter") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
@@ -466,6 +469,34 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	message_admins("[key_name_admin(usr)] toggled the round's canonicity. The round is [GLOB.canon_event ? "now canon." : "no longer canon."]")
 	log_admin("[key_name(usr)] toggled the round's canonicity. The round is [GLOB.canon_event ? "now canon." : "no longer canon."]")
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Toggle Canon") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+
+/client/proc/cmd_admin_global_adjust_masquerade()
+	set name = "Adjust Global Masquerade"
+	set category = "Admin"
+	if (!check_rights(R_ADMIN))
+		return
+
+
+	var/last_global_mask = SSmasquerade.total_level
+
+	var/value = input(usr, "Enter the Global Masquerade adjustment values(- will decrease, + will increase) :", "Global Masquerade Adjustment", 0) as num|null
+	if(value == null)
+		return
+
+	SSmasquerade.manual_adjustment = value
+
+	var/changed_mask = max(0,min(1000,last_global_mask + value))
+
+	SSmasquerade.fire()
+
+	var/msg = "<span class='adminnotice'><b>Global Masquerade Adjustment: [key_name_admin(usr)] has adjusted Global masquerade from [last_global_mask] to [changed_mask] with the value of : [value]. Real Masquerade Value with the other possible variables : [SSmasquerade.total_level]</b></span>"
+	log_admin("Global MasqAdjust: [key_name(usr)] has adjusted Global masquerade from [last_global_mask] to [changed_mask] with the value of : [value]. Real Masquerade Value with the other possible variables : [SSmasquerade.total_level]")
+	message_admins(msg)
+	SSblackbox.record_feedback("tally", "admin_verb", 1, "Global Adjust Masquerade")
+
+
+
+
 
 /client/proc/cmd_admin_adjust_masquerade(mob/living/carbon/human/M in GLOB.player_list)
 	set name = "Adjust Masquerade"
@@ -587,7 +618,7 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 		if ((preferences.pref_species.id != "kindred") && (preferences.pref_species.id != "ghoul"))
 			to_chat(usr, "<span class='warning'>Your target is not a vampire or a ghoul.</span>")
 			return
-		var/giving_discipline = input("What Discipline do you want to give [player]?") as null|anything in (subtypesof(/datum/discipline) - preferences.discipline_types)
+		var/giving_discipline = input("What Discipline do you want to give [player]?") as null|anything in (subtypesof(/datum/discipline) - preferences.discipline_types - /datum/discipline/bloodheal)
 		if (giving_discipline)
 			var/giving_discipline_level = input("What rank of this Discipline do you want to give [player]?") as null|anything in list(0, 1, 2, 3, 4, 5)
 			if (!isnull(giving_discipline_level))
@@ -600,8 +631,7 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 					preferences.discipline_levels += giving_discipline_level
 					preferences.save_character()
 
-					var/datum/discipline/discipline = new giving_discipline
-					discipline.level = giving_discipline_level
+					var/datum/discipline/discipline = new giving_discipline(giving_discipline_level)
 
 					message_admins("[ADMIN_LOOKUPFLW(usr)] gave [ADMIN_LOOKUPFLW(player)] the Discipline [discipline.name] at rank [discipline.level]. Reason: [reason]")
 					log_admin("[key_name(usr)] gave [key_name(player)] the Discipline [discipline.name] at rank [discipline.level]. Reason: [reason]")
@@ -1051,4 +1081,4 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	set name = "Debug Stat Panel"
 	set category = "Debug"
 
-	src << output("", "statbrowser:create_debug")
+	src.stat_panel.send_message("create_debug")
